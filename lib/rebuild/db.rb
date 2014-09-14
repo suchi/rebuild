@@ -5,7 +5,7 @@ module Rebuild
 
 	module DB
 
-		dbpath = ENV['HOME'] + "/.rebuild/anemone.db"
+		dbpath = "/Users/yuto-ogi/Work/ruby/rebuild/lib/anemone.db"
 		
 		ActiveRecord::Base.establish_connection(
 			adapter: "sqlite3",
