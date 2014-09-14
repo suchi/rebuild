@@ -1,25 +1,36 @@
+$LOAD_PATH << __dir__
 require "anemone"
 require "sqlite3"
+require "pp"
+require "db"
+require "setting"
 
 module Rebuild
 
 	module Crawler
-		def self.fetch
-			puts "updated show list!"
 
+		include DB
+		include Setting
+
+
+		def self.fetch
+
+		  DB.init	unless File.exists?(Setting.database)
 
 			url = "http://rebuild.fm/"
+			# url = "http://rebuild.fm/55"
 
 			option = {
-				storage: Anemone::Storage.SQLite3
+				storage: Anemone::Storage::SQLite3(Setting.database)
 			}
 
 
 			Anemone.crawl(url, option) do |anemone|
 
 				anemone.focus_crawl do |page|
+					# puts page
 					page.links.keep_if do |link|
-						link.to_s.match(/http:\/\/rebuild.fm\/[0-9]+|[a]/)
+						puts link.to_s.match(/http:\/\/rebuild.fm\/[0-9]+|[a]/)
 					end
 				end
 
@@ -39,7 +50,7 @@ module Rebuild
 
 					page.doc.css('.episode-description > ul > li > a').each do |element|
 						
-						# p "url: #{element.inner_html}, title:#{element.attributes["href"].value}"
+						p "url: #{element.inner_html}, title:#{element.attributes["href"].value}"
 
 						Rebuild::DB::ShowNote.create!(
 							episode_id: episode.id,
@@ -50,6 +61,8 @@ module Rebuild
 				end
 			end
 
+		rescue => ex
+			pp ex
 		end
 
 
